@@ -1,9 +1,0 @@
-export { default as Notices } from './FacultyNotices';
-export { default as Assignments } from './FacultyAssignments';
-export { default as TT } from './FacultyTT';
-export { default as Quiz } from './FacultyQuiz';
-export { default as LiveChat } from './FacultyLiveChat';
-export { default as GC } from './FacultyGC';
-export { default as Notes } from './FacultyNotes';
-export { default as FacultyProfile } from './FacultyProfile';
-export { default as Faculties } from './FacultyFaculties';

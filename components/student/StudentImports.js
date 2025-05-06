@@ -1,9 +1,0 @@
-export { default as Notices } from './StudentNotices';
-export { default as TT } from './StudentTT';
-export { default as Assignments } from './StudentAssignments';
-export { default as Quiz } from './StudentQuiz';
-export { default as LiveChat } from './StudentLiveChat';
-export { default as GC } from './StudentGC';
-export { default as Notes } from './StudentNotes';
-export { default as Teachers } from './StudentTeachers';
-export { default as StickyHeadTable } from './StickyHeadTable';

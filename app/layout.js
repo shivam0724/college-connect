@@ -1,8 +1,8 @@
 import { STIX_Two_Text } from "next/font/google";
 import "../styles/globals.css";
-import SessionWrapper from "@/components/SessionWrapper";
 import { auth } from "@/auth";
 import { ToastContainer } from "react-toastify";
+import { SessionProvider } from "next-auth/react";
 
 const stixTwoText = STIX_Two_Text({
   subsets: ["latin"],
@@ -10,14 +10,13 @@ const stixTwoText = STIX_Two_Text({
 });
 
 export default function RootLayout({ children }) {
-  const session = auth();
   return (
-    <html lang="en" suppressHydrationWarning={true}>
+    <html lang="en">
       <body className={`${stixTwoText.variable} antialiased`}>
         <ToastContainer />
-        <SessionWrapper session={session}>
+        <SessionProvider>
           {children}
-        </SessionWrapper>
+        </SessionProvider>
       </body>
     </html>
   );

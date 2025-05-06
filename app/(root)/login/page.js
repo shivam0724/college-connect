@@ -6,27 +6,40 @@ import authenticate from '@/lib/authentication';
 
 // components
 import { cn } from "@/lib/shadcn/utils"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from '@/components/ui/label';
+import { Button } from "@/components/shadcn/ui/button"
+import { Card, CardContent } from "@/components/shadcn/ui/card"
+import { Input } from "@/components/shadcn/ui/input"
+import { Label } from '@/components/shadcn/ui/label';
 import { toast } from 'react-toastify';
+import { useSession } from 'next-auth/react';
+import { useEffect } from 'react';
+import ForgotPassword from '@/components/ForgotPassword';
 
 export default function LoginPage({ className }) {
     const router = useRouter();
     const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm();
+    const { data: session, status, update } = useSession();
+
+    useEffect(() => {
+        if (status === "authenticated") {
+            router.replace(session?.role || "/student");
+        }
+    }, [session, status])
 
     const onSubmit = async (data) => {
+        toast.loading("Logging in...");
         const res = await authenticate(data);
+        toast.dismiss();
 
         if (res?.error) {
-            console.log(res);
             toast.error(res.message);
         } else {
             toast.success(res.message);
-            router.push(res?.url);
+            await update();
+            router.push(res?.url || "/student");
         }
     }
+
     return (
         <div className="bg-[#13202d] flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
             <div className="w-full max-w-sm md:max-w-3xl">
@@ -47,11 +60,12 @@ export default function LoginPage({ className }) {
                                         {errors.username && <span className="text-red-500 text-sm">{errors.username.message}</span>}
                                     </div>
                                     <div className="grid gap-3">
-                                        <div className="flex items-center">
+                                        <div className="flex items-center justify-between">
                                             <Label htmlFor="password">Password</Label>
-                                            <Link href="#" className="ml-auto text-sm underline-offset-2 hover:underline">
+                                            {/* <Link href="#" className="ml-auto text-sm underline-offset-2 hover:underline">
                                                 Forgot your password?
-                                            </Link>
+                                            </Link> */}
+                                            <ForgotPassword />
                                         </div>
                                         <Input {...register("password", { required: "Password is required", minLength: { value: 8, message: "Minimum length of password should be 8 characters." } })} id="password" type="password" required />
                                         {errors.password && <span className="text-red-500 text-sm">{errors.password.message}</span>}

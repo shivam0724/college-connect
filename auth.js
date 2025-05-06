@@ -10,8 +10,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 username: { label: "Username", type: "text", placeholder: "jsmith" },
                 password: { label: "Password", type: "password" }
             },
-            type: "credentials",
-            async authorize(credentials, req) {
+            authorize: async (credentials, req) => {
                 try {
                     const { username, password } = credentials;
                     const res = await fetch(`${process.env.API}/auth/userlogin`, {
@@ -21,21 +20,33 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     });
                     const user = await res.json();
 
-                    if (res.status == 200 && user?.user) {
-                        return user;
-                    } else {
-                        return null;
+                    console.log('[auth.js]: ', user);
+
+                    if (res.ok && user) {
+                        return {
+                            id: user?.user?.id,
+                            name: user?.user?.name,
+                            username: user?.user?.username,
+                            email: user?.user?.email,
+                            image: user?.user?.image,
+                            role: user?.user?.role
+                        };
                     }
+
+                    return null;
                 } catch (error) {
                     return null;
                 }
             }
         })
     ],
+    session: {
+        strategy: "jwt",
+    },
     callbacks: {
         async jwt({ token, user }) {
             if (user) {
-                const { id, name, username, email, image, role } = user.user;
+                const { id, name, username, email, image, role } = user;
                 token.id = id;
                 token.name = name;
                 token.username = username;
@@ -52,47 +63,31 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             session.username = token.username;
             session.email = token.email;
             session.picture = token.picture;
+            session.role = token.role;
+            session.url = `${process.env.ROOT}${token.role}` || "/";
 
             return session;
         },
-        async signIn(user) {
-            const role = user?.user?.user?.role || false;
-            if (role === "student") {
-                return "/student/";
-            }
-            else if (role === "faculty") {
-                return "/faculty/";
-            }
+        async signIn() {
+            // const role = user?.user?.role;
 
-            return false;
+            // if (role === "student") {
+            //     return "/student/";
+            // }
+            // else if (role === "faculty") {
+            //     return "/faculty/";
+            // }
+
+            return true;
         }
     },
     events: {
         signOut: async (message) => {
             console.log(message);
-        }
+        },
     },
     pages: {
         signIn: '/login'
-    },
-    jwt: {
-        // maxAge: 60 * 60 * 28,
-        encryption: true,
-    },
-    session: {
-        // maxAge: 60 * 60 * 28,
-        jwt: true,
-    },
-    cookies: {
-        sessionToken: {
-            name: 'sessionToken',
-            options: {
-                httpOnly: true,
-                sameSite: 'Strict',
-                secure: true,
-                path: '/',
-            }
-        },
     },
     secret: process.env.AUTH_SECRET,
     trustHost: true,
